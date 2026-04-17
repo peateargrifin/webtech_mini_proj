@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart City Issue Portal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" stroke="#3b82f6" stroke-width="2"/>
+          <path d="M14 6C10.13 6 7 9.13 7 13c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#3b82f6"/>
+          <circle cx="14" cy="13" r="2.5" fill="white"/>
+        </svg>
+        <span class="brand-name">CityFix Portal</span>
+      </div>
+      <nav class="nav-tabs">
+        <button class="tab active" data-tab="map">Map View</button>
+        <button class="tab" data-tab="list">Issue List</button>
+        <button class="tab" data-tab="report">Report Issue</button>
+        <button class="tab" data-tab="dashboard">Dashboard</button>
+      </nav>
+      <div class="header-right">
+        <span class="user-badge">Dept. Officer</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ── MAP VIEW ── -->
+    <section id="tab-map" class="tab-content active">
+      <div class="map-layout">
+        <div class="map-sidebar">
+          <h2 class="section-title">Filters</h2>
+          <div class="filter-group">
+            <label>Category</label>
+            <select id="filter-cat">
+              <option value="all">All Categories</option>
+              <option value="road">Road & Infrastructure</option>
+              <option value="water">Water & Drainage</option>
+              <option value="electricity">Electricity</option>
+              <option value="sanitation">Sanitation</option>
+              <option value="safety">Public Safety</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select id="filter-status">
+              <option value="all">All Statuses</option>
+              <option value="reported">Reported</option>
+              <option value="verified">Verified</option>
+              <option value="assigned">Assigned</option>
+              <option value="in-progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Priority</label>
+            <select id="filter-priority">
+              <option value="all">All Priorities</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <button class="btn-primary btn-full" onclick="applyFilters()">Apply Filters</button>
+          <hr class="divider"/>
+          <h2 class="section-title">Legend</h2>
+          <div class="legend">
+            <div class="legend-item"><span class="dot dot-reported"></span> Reported</div>
+            <div class="legend-item"><span class="dot dot-verified"></span> Verified</div>
+            <div class="legend-item"><span class="dot dot-assigned"></span> Assigned</div>
+            <div class="legend-item"><span class="dot dot-progress"></span> In Progress</div>
+            <div class="legend-item"><span class="dot dot-resolved"></span> Resolved</div>
+            <div class="legend-item"><span class="dot dot-closed"></span> Closed</div>
+          </div>
+        </div>
+
+        <div class="map-area">
+          <div class="map-topbar">
+            <span class="map-label">Interactive City Map — Click any pin to view issue details</span>
+            <button class="btn-ghost" onclick="resetMapView()">Reset View</button>
+          </div>
+          <div id="city-map">
+            <svg id="map-svg" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg">
+              <!-- Grid lines -->
+              <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e5e7eb" stroke-width="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="800" height="520" fill="#f0f4f8"/>
+              <rect width="800" height="520" fill="url(#grid)"/>
+
+              <!-- Roads -->
+              <g class="roads">
+                <line x1="0" y1="130" x2="800" y2="130" stroke="#d1d5db" stroke-width="10" stroke-linecap="round"/>
+                <line x1="0" y1="300" x2="800" y2="300" stroke="#d1d5db" stroke-width="10" stroke-linecap="round"/>
+                <line x1="0" y1="420" x2="800" y2="420" stroke="#d1d5db" stroke-width="6" stroke-linecap="round"/>
+                <line x1="160" y1="0" x2="160" y2="520" stroke="#d1d5db" stroke-width="10" stroke-linecap="round"/>
+                <line x1="400" y1="0" x2="400" y2="520" stroke="#d1d5db" stroke-width="10" stroke-linecap="round"/>
+                <line x1="620" y1="0" x2="620" y2="520" stroke="#d1d5db" stroke-width="6" stroke-linecap="round"/>
+                <!-- Road labels -->
+                <text x="20" y="120" font-size="10" fill="#9ca3af">MG Road</text>
+                <text x="20" y="290" font-size="10" fill="#9ca3af">Ring Road</text>
+                <text x="155" y="20" font-size="10" fill="#9ca3af" writing-mode="tb">NH-48</text>
+                <text x="395" y="20" font-size="10" fill="#9ca3af" writing-mode="tb">NH-58</text>
+              </g>
+
+              <!-- Zones -->
+              <rect x="170" y="140" width="220" height="150" rx="4" fill="#dbeafe" fill-opacity="0.4" stroke="#93c5fd" stroke-width="0.5"/>
+              <text x="260" y="158" font-size="11" fill="#3b82f6" text-anchor="middle">Zone A — Central</text>
+
+              <rect x="410" y="140" width="200" height="150" rx="4" fill="#d1fae5" fill-opacity="0.4" stroke="#6ee7b7" stroke-width="0.5"/>
+              <text x="505" y="158" font-size="11" fill="#10b981" text-anchor="middle">Zone B — East</text>
+
+              <rect x="170" y="310" width="220" height="100" rx="4" fill="#fef3c7" fill-opacity="0.4" stroke="#fcd34d" stroke-width="0.5"/>
+              <text x="260" y="328" font-size="11" fill="#d97706" text-anchor="middle">Zone C — South</text>
+
+              <rect x="410" y="310" width="200" height="100" rx="4" fill="#ede9fe" fill-opacity="0.4" stroke="#c4b5fd" stroke-width="0.5"/>
+              <text x="505" y="328" font-size="11" fill="#7c3aed" text-anchor="middle">Zone D — SE</text>
+
+              <!-- Issue Pins rendered by JS -->
+              <g id="pins-layer"></g>
+            </svg>
+
+            <!-- Tooltip -->
+            <div id="map-tooltip" class="map-tooltip hidden"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ISSUE LIST ── -->
+    <section id="tab-list" class="tab-content">
+      <div class="list-header">
+        <h2 class="section-title">All Issues</h2>
+        <div class="list-controls">
+          <input type="text" id="search-input" placeholder="Search by ID, title, location…" class="search-input" oninput="renderList()"/>
+          <select id="sort-select" onchange="renderList()">
+            <option value="date-desc">Newest First</option>
+            <option value="date-asc">Oldest First</option>
+            <option value="priority">By Priority</option>
+            <option value="status">By Status</option>
+          </select>
+        </div>
+      </div>
+      <div id="issues-table-wrap">
+        <table class="issues-table" id="issues-table">
+          <thead>
+            <tr>
+              <th>Issue ID</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Reported</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="issues-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── REPORT ISSUE ── -->
+    <section id="tab-report" class="tab-content">
+      <div class="report-layout">
+        <div class="report-form-col">
+          <h2 class="section-title">Report a New Issue</h2>
+          <div class="form-group">
+            <label>Issue Title *</label>
+            <input type="text" id="f-title" placeholder="e.g. Pothole on MG Road near Bus Stop 12"/>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="f-category">
+                <option value="">Select category</option>
+                <option value="road">Road & Infrastructure</option>
+                <option value="water">Water & Drainage</option>
+                <option value="electricity">Electricity</option>
+                <option value="sanitation">Sanitation</option>
+                <option value="safety">Public Safety</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Priority *</label>
+              <select id="f-priority">
+                <option value="">Select priority</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="f-desc" rows="3" placeholder="Provide details about the issue…"></textarea>
+          </div>
+
+          <div class="geotag-box">
+            <div class="geotag-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              <span>Geotagging</span>
+            </div>
+            <div class="geotag-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Latitude</label>
+                  <input type="number" id="f-lat" placeholder="28.6139" step="0.0001"/>
+                </div>
+                <div class="form-group">
+                  <label>Longitude</label>
+                  <input type="number" id="f-lng" placeholder="77.2090" step="0.0001"/>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Zone</label>
+                  <select id="f-zone">
+                    <option value="">Select zone</option>
+                    <option value="Zone A — Central">Zone A — Central</option>
+                    <option value="Zone B — East">Zone B — East</option>
+                    <option value="Zone C — South">Zone C — South</option>
+                    <option value="Zone D — SE">Zone D — SE</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Ward No.</label>
+                  <input type="text" id="f-ward" placeholder="e.g. Ward 12"/>
+                </div>
+              </div>
+              <button class="btn-geo" onclick="autoGeolocate()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/></svg>
+                Auto-detect my location
+              </button>
+              <div id="geo-status" class="geo-status hidden"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Attach Photo (optional)</label>
+            <div class="file-drop" id="file-drop" ondragover="event.preventDefault()" ondrop="handleDrop(event)" onclick="document.getElementById('f-file').click()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span id="file-label">Click to upload or drag & drop</span>
+              <input type="file" id="f-file" accept="image/*" style="display:none" onchange="handleFileSelect(event)"/>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-secondary" onclick="resetForm()">Clear</button>
+            <button class="btn-primary" onclick="submitIssue()">Submit Issue</button>
+          </div>
+          <div id="submit-msg" class="submit-msg hidden"></div>
+        </div>
+
+        <div class="report-info-col">
+          <div class="info-card">
+            <h3>Workflow Overview</h3>
+            <div class="workflow-steps">
+              <div class="wf-step"><div class="wf-dot wf-reported"></div><div><strong>Reported</strong><p>Citizen submits with geotag</p></div></div>
+              <div class="wf-arrow"></div>
+              <div class="wf-step"><div class="wf-dot wf-verified"></div><div><strong>Verified</strong><p>Officer validates location & photo</p></div></div>
+              <div class="wf-arrow"></div>
+              <div class="wf-step"><div class="wf-dot wf-assigned"></div><div><strong>Assigned</strong><p>Dept. team is allocated</p></div></div>
+              <div class="wf-arrow"></div>
+              <div class="wf-step"><div class="wf-dot wf-progress"></div><div><strong>In Progress</strong><p>Field team working on-site</p></div></div>
+              <div class="wf-arrow"></div>
+              <div class="wf-step"><div class="wf-dot wf-resolved"></div><div><strong>Resolved</strong><p>Work done, pending review</p></div></div>
+              <div class="wf-arrow"></div>
+              <div class="wf-step"><div class="wf-dot wf-closed"></div><div><strong>Closed</strong><p>Verified and archived</p></div></div>
+            </div>
+          </div>
+
+          <div class="info-card tips-card">
+            <h3>Geotagging Tips</h3>
+            <ul>
+              <li>Use "Auto-detect" for best accuracy</li>
+              <li>Or manually enter coordinates from Google Maps</li>
+              <li>Always select the correct Zone & Ward</li>
+              <li>Photo geodata is extracted automatically when available</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── DASHBOARD ── -->
+    <section id="tab-dashboard" class="tab-content">
+      <h2 class="section-title">Overview Dashboard</h2>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="dash-row">
+        <div class="dash-card">
+          <h3>Issues by Status</h3>
+          <div id="chart-status" class="bar-chart"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Issues by Category</h3>
+          <div id="chart-category" class="bar-chart"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Issues by Zone</h3>
+          <div id="chart-zone" class="bar-chart"></div>
+        </div>
+      </div>
+      <div class="dash-row">
+        <div class="dash-card dash-card-wide">
+          <h3>Recent Activity Feed</h3>
+          <div id="activity-feed" class="activity-feed"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Priority Distribution</h3>
+          <div id="chart-priority" class="bar-chart"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- DETAIL MODAL -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
+    <div class="modal" id="issue-modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
